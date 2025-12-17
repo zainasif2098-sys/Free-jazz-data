@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "capture.php",
+      "use": "@vercel/php"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
